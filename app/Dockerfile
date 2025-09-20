@@ -1,31 +1,33 @@
 # Build Stage 1
-
 FROM node:22-alpine AS build
 WORKDIR /app
 
-RUN corepack enable
-
-# Copy package.json and your lockfile, here we add pnpm-lock.yaml for illustration
-COPY package.json pnpm-lock.yaml .npmrc ./
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN pnpm i
+RUN npm ci
 
 # Copy the entire project
 COPY . ./
 
 # Build the project
-RUN pnpm run build
+RUN npm run build
 
-# Build Stage 2
-
+# Build Stage 2 (Production image)
 FROM node:22-alpine
 WORKDIR /app
 
-# Only `.output` folder is needed from the build stage
+# Copy package.json for runtime dependencies
+COPY package.json package-lock.json ./
+
+# Install only production deps
+RUN npm ci --omit=dev
+
+# Copy built app from build stage
 COPY --from=build /app/.output/ ./
 
-# Change the port and host
+# Configure server
 ENV PORT=80
 ENV HOST=0.0.0.0
 
