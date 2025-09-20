@@ -15,8 +15,8 @@
   --accent: #F9E8D2;
 }
 
-html {
-  background-color: var(--accent);
+body {
+  background-color: whitesmoke;
 }
 
 </style>
